@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midwife Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="text" id="midwifeName" placeholder="Midwife Name" required>
+            <input type="password" id="midwifePassword" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="loginError" class="error"></div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const midwifeName = document.getElementById('midwifeName').value;
+            const midwifePassword = document.getElementById('midwifePassword').value;
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ midwifeName, midwifePassword })
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data === 'Login successful') {
+                    window.location.href = '/home.html';
+                } else {
+                    document.getElementById('loginError').innerText = data;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

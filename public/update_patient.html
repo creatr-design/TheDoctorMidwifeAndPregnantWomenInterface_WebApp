@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Patient</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <button id="burgerButton">☰</button>
+            <button id="logoutButton" class="logout-button">Logout</button>
+        </div>
+        <div id="sidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" id="closeSidebarButton">&times;</a>
+            <a href="add_patient.html">Add Patient</a>
+            <a href="update_patient.html">Update Patient</a>
+            <a href="create_appointment.html">Create Appointment</a>
+            <a href="update_appointment_status.html">Update Appointment Status</a>
+        </div>
+        <div id="mainContent" class="main-content">
+            <h2>Update Patient</h2>
+            <form id="updatePatientForm">
+                <label for="patientId">Patient ID:</label>
+                <input type="text" id="patientId" name="patientId" required><br>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name"><br>
+                <label for="phone">Phone Number:</label>
+                <input type="text" id="phone" name="phone"><br>
+                <button type="submit">Update Patient</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('burgerButton').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        });
+
+        document.getElementById('closeSidebarButton').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('active');
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            fetch('/api/auth/logout', {
+                method: 'POST'
+            })
+            .then(() => {
+                window.location.href = '/';
+            });
+        });
+
+        document.getElementById('updatePatientForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/api/patients/' + document.getElementById('patientId').value, {
+                method: 'PUT',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Patient updated successfully!');
+                } else {
+                    alert('Error updating patient.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Appointment Status</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <button id="burgerButton">☰</button>
+            <button id="logoutButton" class="logout-button">Logout</button>
+        </div>
+        <div id="sidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" id="closeSidebarButton">&times;</a>
+            <a href="add_patient.html">Add Patient</a>
+            <a href="update_patient.html">Update Patient</a>
+            <a href="create_appointment.html">Create Appointment</a>
+            <a href="update_appointment_status.html">Update Appointment Status</a>
+        </div>
+        <div id="mainContent" class="main-content">
+            <h2>Update Appointment Status</h2>
+            <form id="updateAppointmentStatusForm">
+                <label for="appointmentId">Appointment ID:</label>
+                <input type="text" id="appointmentId" name="appointmentId" required><br>
+                <label for="status">Status:</label>
+                <select id="status" name="status" required>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Canceled">Canceled</option>
+                    <option value="Notified">Notified</option>
+                </select><br>
+                <button type="submit">Update Status</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('burgerButton').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        });
+
+        document.getElementById('closeSidebarButton').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('active');
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            fetch('/api/auth/logout', {
+                method: 'POST'
+            })
+            .then(() => {
+                window.location.href = '/';
+            });
+        });
+
+        document.getElementById('updateAppointmentStatusForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/api/appointments/' + document.getElementById('appointmentId').value, {
+                method: 'PUT',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Appointment status updated successfully!');
+                } else {
+                    alert('Error updating appointment status.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

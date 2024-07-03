@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Appointment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <button id="burgerButton">☰</button>
+            <button id="logoutButton" class="logout-button">Logout</button>
+        </div>
+        <div id="sidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" id="closeSidebarButton">&times;</a>
+            <a href="add_patient.html">Add Patient</a>
+            <a href="update_patient.html">Update Patient</a>
+            <a href="create_appointment.html">Create Appointment</a>
+            <a href="update_appointment_status.html">Update Appointment Status</a>
+        </div>
+        <div id="mainContent" class="main-content">
+            <h2>Create Appointment</h2>
+            <form id="createAppointmentForm">
+                <label for="patientId">Patient ID:</label>
+                <input type="text" id="patientId" name="patientId" required><br>
+                <label for="midwifeId">Midwife ID:</label>
+                <input type="text" id="midwifeId" name="midwifeId" required><br>
+                <label for="appointmentDate">Appointment Date:</label>
+                <input type="date" id="appointmentDate" name="appointmentDate" required><br>
+                <button type="submit">Create Appointment</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('burgerButton').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        });
+
+        document.getElementById('closeSidebarButton').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('active');
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            fetch('/api/auth/logout', {
+                method: 'POST'
+            })
+            .then(() => {
+                window.location.href = '/';
+            });
+        });
+
+        document.getElementById('createAppointmentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/api/appointments', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Appointment created successfully!');
+                } else {
+                    alert('Error creating appointment.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
