@@ -9,62 +9,69 @@
 <body>
     <div class="container">
         <div class="navbar">
-            <button id="burgerButton">☰</button>
-            <button id="logoutButton" class="logout-button">Logout</button>
+            <button onclick="openSidebar()">&#9776;</button>
+            <h2>Midwife Portal</h2>
+            <button class="logout-button" onclick="logout()">Logout</button>
         </div>
         <div id="sidebar" class="sidebar">
-            <a href="javascript:void(0)" class="closebtn" id="closeSidebarButton">&times;</a>
-            <a href="add_patient.html">Add Patient</a>
-            <a href="update_patient.html">Update Patient</a>
-            <a href="create_appointment.html">Create Appointment</a>
-            <a href="update_appointment_status.html">Update Appointment Status</a>
+            <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+            <a href="/home">Home</a>
+            <a href="/add_patient.html">Add Patient</a>
+            <a href="/update_patient.html">Update Patient</a>
+            <a href="/create_appointment.html">Create Appointment</a>
+            <a href="/update_appointment_status.html">Update Appointment Status</a>
         </div>
-        <div id="mainContent" class="main-content">
+        <div class="main-content">
             <h2>Create Appointment</h2>
             <form id="createAppointmentForm">
-                <label for="patientId">Patient ID:</label>
-                <input type="text" id="patientId" name="patientId" required><br>
-                <label for="midwifeId">Midwife ID:</label>
-                <input type="text" id="midwifeId" name="midwifeId" required><br>
-                <label for="appointmentDate">Appointment Date:</label>
-                <input type="date" id="appointmentDate" name="appointmentDate" required><br>
+                <input type="text" id="patientId" name="patientId" placeholder="Patient ID" required>
+                <input type="text" id="midwifeId" name="midwifeId" placeholder="Midwife ID" required>
+                <input type="date" id="appointmentDate" name="appointmentDate" placeholder="Appointment Date" required>
                 <button type="submit">Create Appointment</button>
             </form>
+            <div id="result" class="result"></div>
         </div>
     </div>
     <script>
-        document.getElementById('burgerButton').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
-        });
+        function openSidebar() {
+            document.getElementById("sidebar").classList.add("active");
+        }
 
-        document.getElementById('closeSidebarButton').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.remove('active');
-        });
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove("active");
+        }
 
-        document.getElementById('logoutButton').addEventListener('click', function() {
+        function logout() {
             fetch('/api/auth/logout', {
-                method: 'POST'
-            })
-            .then(() => {
-                window.location.href = '/';
+                method: 'POST',
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    alert('Logout failed');
+                }
             });
-        });
+        }
 
         document.getElementById('createAppointmentForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const formData = new FormData(this);
+            const patientId = document.getElementById('patientId').value;
+            const midwifeId = document.getElementById('midwifeId').value;
+            const appointmentDate = document.getElementById('appointmentDate').value;
+
             fetch('/api/appointments', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ patientId, midwifeId, appointmentDate })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Appointment created successfully!');
+                    document.getElementById('result').innerText = 'Appointment created successfully!';
                 } else {
-                    alert('Error creating appointment.');
+                    document.getElementById('result').innerText = 'Error creating appointment.';
                 }
             });
         });

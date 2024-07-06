@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const pg = require('pg');
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ const port = 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
     secret: 'secret-key',
@@ -27,6 +28,15 @@ const pool = new pg.Pool({
     port: process.env.DB_PORT
 });
 
+// Test database connection
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+        console.error('Error connecting to the database:', err);
+    } else {
+        console.log('Database connection successful:', res.rows);
+    }
+});
+
 // Middleware to check if the user is authenticated
 function checkAuth(req, res, next) {
     if (req.session.user) {
@@ -37,24 +47,25 @@ function checkAuth(req, res, next) {
 }
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.get('/home', checkAuth, (req, res) => {
-    res.sendFile(__dirname + '/public/home.html');
+    res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
 app.post('/api/auth/login', (req, res) => {
-    const { username, password } = req.body;
-    pool.query('SELECT * FROM midwives WHERE username = $1 AND password = $2', [username, password], (error, results) => {
+    const { midwifeName, midwifePassword } = req.body;
+    pool.query('SELECT * FROM midwives WHERE LOWER(midwifename) = LOWER($1) AND midwifepassword = $2', [midwifeName, midwifePassword], (error, results) => {
         if (error) {
-            throw error;
+            res.json({ success: false, message: 'Database error' });
+            return;
         }
         if (results.rows.length > 0) {
             req.session.user = results.rows[0];
             res.json({ success: true });
         } else {
-            res.json({ success: false });
+            res.json({ success: false, message: 'Invalid credentials' });
         }
     });
 });
@@ -90,8 +101,8 @@ app.put('/api/patients/:id', checkAuth, (req, res) => {
 });
 
 app.post('/api/appointments', checkAuth, (req, res) => {
-    const { patientId, midwifeId, appointmentDate } = req.body;
-    pool.query('INSERT INTO appointments (patientid, midwifeid, appointmentdate) VALUES ($1, $2, $3)', [patientId, midwifeId, appointmentDate], (error, results) => {
+    const { patientId, midwifeId, appointmentDate, notes } = req.body;
+    pool.query('INSERT INTO appointments (patientid, midwifeid, appointmentdate, notes) VALUES ($1, $2, $3, $4)', [patientId, midwifeId, appointmentDate, notes], (error, results) => {
         if (error) {
             throw error;
         }
@@ -107,6 +118,21 @@ app.put('/api/appointments/:id', checkAuth, (req, res) => {
             throw error;
         }
         res.json({ success: true });
+    });
+});
+
+app.get('/api/auth/user', checkAuth, (req, res) => {
+    res.json(req.session.user);
+});
+
+app.get('/api/appointments/next', checkAuth, (req, res) => {
+    const midwifeId = req.session.user.midwifeid;
+    pool.query('SELECT a.*, p.name as patientName FROM appointments a JOIN patients p ON a.patientid = p.patientid WHERE a.midwifeid = $1 AND a.appointmentdate > NOW() ORDER BY a.appointmentdate ASC LIMIT 1', [midwifeId], (error, results) => {
+        if (error) {
+            res.json({ success: false, message: 'Database error' });
+            return;
+        }
+        res.json(results.rows[0]);
     });
 });
 

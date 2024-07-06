@@ -10,8 +10,8 @@
     <div class="login-container">
         <h2>Login</h2>
         <form id="loginForm">
-            <input type="text" id="midwifeName" placeholder="Midwife Name" required>
-            <input type="password" id="midwifePassword" placeholder="Password" required>
+            <input type="text" id="midwifeName" name="midwifeName" placeholder="Midwife Name" required>
+            <input type="password" id="midwifePassword" name="midwifePassword" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
         <div id="loginError" class="error"></div>
@@ -29,13 +29,16 @@
                 },
                 body: JSON.stringify({ midwifeName, midwifePassword })
             })
-            .then(response => response.text())
+            .then(response => response.json())
             .then(data => {
-                if (data === 'Login successful') {
-                    window.location.href = '/home.html';
+                if (data.success) {
+                    window.location.href = '/home';
                 } else {
-                    document.getElementById('loginError').innerText = data;
+                    document.getElementById('loginError').innerText = data.message;
                 }
+            })
+            .catch(error => {
+                document.getElementById('loginError').innerText = error.message;
             });
         });
     </script>

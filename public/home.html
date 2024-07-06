@@ -7,42 +7,61 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="navbar">
-            <button id="burgerButton">☰</button>
-            <button id="logoutButton" class="logout-button">Logout</button>
-        </div>
-        <div id="sidebar" class="sidebar">
-            <a href="javascript:void(0)" class="closebtn" id="closeSidebarButton">&times;</a>
-            <a href="add_patient.html">Add Patient</a>
-            <a href="update_patient.html">Update Patient</a>
-            <a href="create_appointment.html">Create Appointment</a>
-            <a href="update_appointment_status.html">Update Appointment Status</a>
-        </div>
-        <div id="mainContent" class="main-content">
-            <h2>Welcome to the Appointment System</h2>
-            <!-- Main content for home page -->
-        </div>
+    <div class="navbar">
+        <button class="menu-button" onclick="openSidebar()">☰</button>
+        <h1>Home</h1>
+        <div id="welcomeMessage"></div>
+    </div>
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+        <a href="home">Home</a>
+        <a href="add_patient.html">Add Patient</a>
+        <a href="update_patient.html">Update Patient</a>
+        <a href="create_appointment.html">Create Appointment</a>
+        <a href="update-appointment_status.html">Update Appointment Status</a>
+        <a href="javascript:void(0)" onclick="logout()">Logout</a>
+    </div>
+    <div class="main-content">
+        <div id="nextAppointment"></div>
     </div>
     <script>
-        document.getElementById('burgerButton').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('active');
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/auth/user')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('welcomeMessage').innerText = `Hello, ${data.midwifeName}`;
+                    fetch(`/api/appointments/next`)
+                        .then(response => response.json())
+                        .then(appointment => {
+                            document.getElementById('nextAppointment').innerHTML = `
+                                <h2>Next Appointment</h2>
+                                <p>Patient: ${appointment.patientname}</p>
+                                <p>Date: ${new Date(appointment.appointmentdate).toLocaleString()}</p>
+                                <p>Notes: ${appointment.notes}</p>
+                            `;
+                        });
+                });
         });
 
-        document.getElementById('closeSidebarButton').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.remove('active');
-        });
+        function openSidebar() {
+            document.getElementById("sidebar").style.width = "250px";
+        }
 
-        document.getElementById('logoutButton').addEventListener('click', function() {
+        function closeSidebar() {
+            document.getElementById("sidebar").style.width = "0";
+        }
+
+        function logout() {
             fetch('/api/auth/logout', {
                 method: 'POST'
             })
-            .then(() => {
-                window.location.href = '/';
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                }
             });
-        });
+        }
     </script>
 </body>
 </html>
