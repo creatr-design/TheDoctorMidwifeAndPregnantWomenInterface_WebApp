@@ -51,8 +51,80 @@ app.get('/', (req, res) => {
 });
 
 app.get('/home', checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'home.html'));
+    const midwifeId = req.session.user.midwifeid;
+
+    const query = `
+        SELECT a.appointmentdate, p.patientname, a.notes
+        FROM appointments a
+        JOIN patients p ON a.patientid = p.patientid
+        WHERE a.midwifeid = $1 AND a.appointmentdate > NOW()
+        ORDER BY a.appointmentdate ASC
+        LIMIT 1
+    `;
+
+    pool.query(query, [midwifeId], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error);
+            res.sendFile(path.join(__dirname, 'public', 'home.html')); // Sending the home page without dynamic data
+        } else {
+            const appointment = results.rows[0] || { patientname: 'No appointments', appointmentdate: null, notes: 'No notes available' };
+            res.send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Home</title>
+                    <link rel="stylesheet" href="styles.css">
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="navbar">
+                            <span class="burger" onclick="openSidebar()">☰</span>
+                            <span class="welcome-message">Hello, ${req.session.user.midwifename}</span>
+                        </div>
+                        <div class="sidebar" id="sidebar">
+                            <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">×</a>
+                            <a href="/home">Home</a>
+                            <a href="/add-patient">Add Patient</a>
+                            <a href="/update-patient">Update Patient</a>
+                            <a href="/create-appointment">Create Appointment</a>
+                            <a href="/update-appointment">Update Appointment</a>
+                            <a href="#" onclick="logout()">Logout</a>
+                        </div>
+                        <div class="main-content">
+                            <h1>Next Appointment</h1>
+                            <p>Patient: ${appointment.patientname}</p>
+                            <p>Date: ${appointment.appointmentdate ? new Date(appointment.appointmentdate).toLocaleString() : 'No upcoming appointments'}</p>
+                            <p>Notes: ${appointment.notes || 'No notes available'}</p>
+                        </div>
+                    </div>
+                    <script>
+                        function openSidebar() {
+                            document.getElementById("sidebar").style.width = "250px";
+                        }
+
+                        function closeSidebar() {
+                            document.getElementById("sidebar").style.width = "0";
+                        }
+
+                        function logout() {
+                            fetch('/api/auth/logout', { method: 'POST' })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        window.location.href = '/';
+                                    }
+                                });
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
+        }
+    });
 });
+
 
 app.post('/api/auth/login', (req, res) => {
     const { midwifeName, midwifePassword } = req.body;
@@ -69,6 +141,20 @@ app.post('/api/auth/login', (req, res) => {
         }
     });
 });
+
+app.get('/add-patient', checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'add-patient.html'));
+});
+
+app.get('/update-patient', checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'update-patient.html'));
+});
+
+app.get('/create-appointment', checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'create-appointment.html'));
+});
+
+
 
 app.post('/api/auth/logout', (req, res) => {
     req.session.destroy(err => {
@@ -122,18 +208,31 @@ app.put('/api/appointments/:id', checkAuth, (req, res) => {
 });
 
 app.get('/api/auth/user', checkAuth, (req, res) => {
-    res.json(req.session.user);
+    res.json({
+        midwifeid: req.session.user.midwifeid,
+        midwifename: req.session.user.midwifename
+    });
 });
 
 app.get('/api/appointments/next', checkAuth, (req, res) => {
     const midwifeId = req.session.user.midwifeid;
-    pool.query('SELECT a.*, p.name as patientName FROM appointments a JOIN patients p ON a.patientid = p.patientid WHERE a.midwifeid = $1 AND a.appointmentdate > NOW() ORDER BY a.appointmentdate ASC LIMIT 1', [midwifeId], (error, results) => {
-        if (error) {
-            res.json({ success: false, message: 'Database error' });
-            return;
+    pool.query(
+        `SELECT a.*, p.name as patientname 
+         FROM appointments a 
+         JOIN patients p ON a.patientid = p.patientid 
+         WHERE a.midwifeid = $1 AND a.appointmentdate > NOW() 
+         ORDER BY a.appointmentdate ASC 
+         LIMIT 1`, 
+        [midwifeId], 
+        (error, results) => {
+            if (error) {
+                console.error('Database query error:', error);
+                res.json({ success: false, message: 'Database error' });
+                return;
+            }
+            res.json(results.rows[0] || null);
         }
-        res.json(results.rows[0]);
-    });
+    );
 });
 
 app.listen(port, () => {

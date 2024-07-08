@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Midwife Login</title>
+    <title>Login</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="login-container">
-        <h2>Login</h2>
+        <h1>Login</h1>
         <form id="loginForm">
-            <input type="text" id="midwifeName" name="midwifeName" placeholder="Midwife Name" required>
-            <input type="password" id="midwifePassword" name="midwifePassword" placeholder="Password" required>
+            <label for="midwifeName">Midwife Name:</label>
+            <input type="text" id="midwifeName" name="midwifeName" required>
+            <label for="midwifePassword">Password:</label>
+            <input type="password" id="midwifePassword" name="midwifePassword" required>
             <button type="submit">Login</button>
         </form>
-        <div id="loginError" class="error"></div>
+        <div id="loginError" style="color: red; display: none;"></div>
     </div>
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const midwifeName = document.getElementById('midwifeName').value;
-            const midwifePassword = document.getElementById('midwifePassword').value;
-
+            const formData = new FormData(event.target);
             fetch('/api/auth/login', {
                 method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ midwifeName, midwifePassword })
+                }
             })
             .then(response => response.json())
             .then(data => {
@@ -35,10 +35,8 @@
                     window.location.href = '/home';
                 } else {
                     document.getElementById('loginError').innerText = data.message;
+                    document.getElementById('loginError').style.display = 'block';
                 }
-            })
-            .catch(error => {
-                document.getElementById('loginError').innerText = error.message;
             });
         });
     </script>

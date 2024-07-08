@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Patient</title>
+    <title>Create Appointment</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,37 +22,37 @@
             <a href="#" onclick="logout()">Logout</a>
         </div>
         <div class="main-content">
-            <h1>Update Patient</h1>
-            <form id="updatePatientForm">
+            <h1>Create Appointment</h1>
+            <form id="createAppointmentForm">
                 <input type="text" id="patientId" name="patientId" placeholder="Patient ID" required>
-                <input type="text" id="patientName" name="patientName" placeholder="New Patient Name" required>
-                <input type="text" id="patientPhone" name="patientPhone" placeholder="New Patient Phone" required>
-                <button type="submit">Update Patient</button>
+                <input type="datetime-local" id="appointmentDate" name="appointmentDate" required>
+                <textarea id="notes" name="notes" placeholder="Notes"></textarea>
+                <button type="submit">Create Appointment</button>
             </form>
         </div>
     </div>
     <script>
-        document.getElementById('updatePatientForm').addEventListener('submit', function(event) {
+        document.getElementById('createAppointmentForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const patientId = document.getElementById('patientId').value;
-            const patientName = document.getElementById('patientName').value;
-            const patientPhone = document.getElementById('patientPhone').value;
+            const appointmentDate = document.getElementById('appointmentDate').value;
+            const notes = document.getElementById('notes').value;
 
-            fetch(`/api/patients/${patientId}`, {
-                method: 'PUT',
+            fetch('/api/appointments', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name: patientName, phone: patientPhone })
+                body: JSON.stringify({ patientId: patientId, appointmentDate: appointmentDate, notes: notes })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Patient updated successfully');
+                    alert('Appointment created successfully');
                 }
             })
             .catch(error => {
-                console.error('Error updating patient:', error);
+                console.error('Error creating appointment:', error);
             });
         });
 

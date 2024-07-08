@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Patient</title>
+    <title>Add Patient</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,24 +22,22 @@
             <a href="#" onclick="logout()">Logout</a>
         </div>
         <div class="main-content">
-            <h1>Update Patient</h1>
-            <form id="updatePatientForm">
-                <input type="text" id="patientId" name="patientId" placeholder="Patient ID" required>
-                <input type="text" id="patientName" name="patientName" placeholder="New Patient Name" required>
-                <input type="text" id="patientPhone" name="patientPhone" placeholder="New Patient Phone" required>
-                <button type="submit">Update Patient</button>
+            <h1>Add Patient</h1>
+            <form id="addPatientForm">
+                <input type="text" id="patientName" name="patientName" placeholder="Patient Name" required>
+                <input type="text" id="patientPhone" name="patientPhone" placeholder="Patient Phone" required>
+                <button type="submit">Add Patient</button>
             </form>
         </div>
     </div>
     <script>
-        document.getElementById('updatePatientForm').addEventListener('submit', function(event) {
+        document.getElementById('addPatientForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const patientId = document.getElementById('patientId').value;
             const patientName = document.getElementById('patientName').value;
             const patientPhone = document.getElementById('patientPhone').value;
 
-            fetch(`/api/patients/${patientId}`, {
-                method: 'PUT',
+            fetch('/api/patients', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -48,11 +46,11 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Patient updated successfully');
+                    alert('Patient added successfully');
                 }
             })
             .catch(error => {
-                console.error('Error updating patient:', error);
+                console.error('Error adding patient:', error);
             });
         });
 
