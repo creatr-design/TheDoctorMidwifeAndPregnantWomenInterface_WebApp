@@ -4,6 +4,7 @@ const session = require('express-session');
 const pg = require('pg');
 const dotenv = require('dotenv');
 const path = require('path');
+const axios = require('axios');
 
 dotenv.config();
 
@@ -51,109 +52,26 @@ app.get('/', (req, res) => {
 });
 
 app.get('/home', checkAuth, (req, res) => {
-    const midwifeId = req.session.user.midwifeid;
-
-    const query = `
-        SELECT a.appointmentdate, p.patientname, a.notes
-        FROM appointments a
-        JOIN patients p ON a.patientid = p.patientid
-        WHERE a.midwifeid = $1 AND a.appointmentdate > NOW()
-        ORDER BY a.appointmentdate ASC
-        LIMIT 1
-    `;
-
-    pool.query(query, [midwifeId], (error, results) => {
-        if (error) {
-            console.error('Database query error:', error);
-            res.sendFile(path.join(__dirname, 'public', 'home.html')); // Sending the home page without dynamic data
-        } else {
-            const appointment = results.rows[0] || { patientname: 'No appointments', appointmentdate: null, notes: 'No notes available' };
-            res.send(`
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Home</title>
-                    <link rel="stylesheet" href="styles.css">
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="navbar">
-                            <span class="burger" onclick="openSidebar()">☰</span>
-                            <span class="welcome-message">Hello, ${req.session.user.midwifename}</span>
-                        </div>
-                        <div class="sidebar" id="sidebar">
-                            <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">×</a>
-                            <a href="/home">Home</a>
-                            <a href="/add-patient">Add Patient</a>
-                            <a href="/update-patient">Update Patient</a>
-                            <a href="/create-appointment">Create Appointment</a>
-                            <a href="/update-appointment">Update Appointment</a>
-                            <a href="#" onclick="logout()">Logout</a>
-                        </div>
-                        <div class="main-content">
-                            <h1>Next Appointment</h1>
-                            <p>Patient: ${appointment.patientname}</p>
-                            <p>Date: ${appointment.appointmentdate ? new Date(appointment.appointmentdate).toLocaleString() : 'No upcoming appointments'}</p>
-                            <p>Notes: ${appointment.notes || 'No notes available'}</p>
-                        </div>
-                    </div>
-                    <script>
-                        function openSidebar() {
-                            document.getElementById("sidebar").style.width = "250px";
-                        }
-
-                        function closeSidebar() {
-                            document.getElementById("sidebar").style.width = "0";
-                        }
-
-                        function logout() {
-                            fetch('/api/auth/logout', { method: 'POST' })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        window.location.href = '/';
-                                    }
-                                });
-                        }
-                    </script>
-                </body>
-                </html>
-            `);
-        }
-    });
+    res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
-
 app.post('/api/auth/login', (req, res) => {
-    const { midwifeName, midwifePassword } = req.body;
-    pool.query('SELECT * FROM midwives WHERE LOWER(midwifename) = LOWER($1) AND midwifepassword = $2', [midwifeName, midwifePassword], (error, results) => {
+    const { username, midwifePassword } = req.body;
+
+    pool.query('SELECT * FROM midwives WHERE LOWER(username) = LOWER($1) AND midwifepassword = $2', [username, midwifePassword], (error, results) => {
         if (error) {
+            console.error('Database query error:', error);
             res.json({ success: false, message: 'Database error' });
             return;
         }
         if (results.rows.length > 0) {
             req.session.user = results.rows[0];
-            res.json({ success: true });
+            res.json({ success: true, midwifeName: results.rows[0].firstname + ' ' + results.rows[0].lastname });
         } else {
             res.json({ success: false, message: 'Invalid credentials' });
         }
     });
 });
-
-app.get('/add-patient', checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'add-patient.html'));
-});
-
-app.get('/update-patient', checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'update-patient.html'));
-});
-
-app.get('/create-appointment', checkAuth, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'create-appointment.html'));
-});
-
 
 
 app.post('/api/auth/logout', (req, res) => {
@@ -165,9 +83,67 @@ app.post('/api/auth/logout', (req, res) => {
     });
 });
 
+app.post('/api/auth/send-otp', (req, res) => {
+    const { phoneNumber } = req.body;
+
+    axios.post('https://sms.arkesel.com/api/otp/generate', {
+        expiry: 5,
+        length: 6,
+        medium: 'sms',
+        message: 'This is OTP from Arkesel, %otp_code%',
+        number: phoneNumber,
+        sender_id: 'Arkesel',
+        type: 'numeric'
+    }, {
+        headers: {
+            'api-key': process.env.OTP_API_KEY
+        }
+    }).then(response => {
+        res.json({ success: true, message: 'OTP sent successfully' });
+    }).catch(error => {
+        console.error('Error sending OTP:', error);
+        res.json({ success: false, message: 'Failed to send OTP' });
+    });
+});
+
+app.post('/api/auth/verify-otp', (req, res) => {
+    const { otp, phoneNumber } = req.body;
+
+    axios.post('https://sms.arkesel.com/api/otp/verify', {
+        code: otp,
+        number: phoneNumber
+    }, {
+        headers: {
+            'api-key': process.env.OTP_API_KEY
+        }
+    }).then(response => {
+        if (response.data.success) {
+            res.json({ success: true, message: 'OTP verified successfully' });
+        } else {
+            res.json({ success: false, message: 'Invalid OTP' });
+        }
+    }).catch(error => {
+        console.error('Error verifying OTP:', error);
+        res.json({ success: false, message: 'Failed to verify OTP' });
+    });
+});
+
+app.post('/api/auth/reset-password', (req, res) => {
+    const { newPassword, phoneNumber } = req.body;
+
+    pool.query('UPDATE midwives SET midwifepassword = $1 WHERE phone = $2', [newPassword, phoneNumber], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error);
+            res.json({ success: false, message: 'Database error' });
+            return;
+        }
+        res.json({ success: true, message: 'Password reset successfully' });
+    });
+});
+
 app.post('/api/patients', checkAuth, (req, res) => {
-    const { name, phone } = req.body;
-    pool.query('INSERT INTO patients (name, phone) VALUES ($1, $2)', [name, phone], (error, results) => {
+    const { name, phone, language } = req.body;
+    pool.query('INSERT INTO patients (patientname, patientphone, language, midwifeid) VALUES ($1, $2, $3, $4)', [name, phone, language, req.session.user.midwifeid], (error, results) => {
         if (error) {
             throw error;
         }
@@ -177,8 +153,8 @@ app.post('/api/patients', checkAuth, (req, res) => {
 
 app.put('/api/patients/:id', checkAuth, (req, res) => {
     const id = req.params.id;
-    const { name, phone } = req.body;
-    pool.query('UPDATE patients SET name = $1, phone = $2 WHERE patientid = $3', [name, phone, id], (error, results) => {
+    const { name, phone, language } = req.body;
+    pool.query('UPDATE patients SET patientname = $1, patientphone = $2, language = $3 WHERE patientid = $4', [name, phone, language, id], (error, results) => {
         if (error) {
             throw error;
         }
@@ -187,8 +163,8 @@ app.put('/api/patients/:id', checkAuth, (req, res) => {
 });
 
 app.post('/api/appointments', checkAuth, (req, res) => {
-    const { patientId, midwifeId, appointmentDate, notes } = req.body;
-    pool.query('INSERT INTO appointments (patientid, midwifeid, appointmentdate, notes) VALUES ($1, $2, $3, $4)', [patientId, midwifeId, appointmentDate, notes], (error, results) => {
+    const { patientId, appointmentDate } = req.body;
+    pool.query('INSERT INTO appointments (patientid, midwifeid, appointmentdate) VALUES ($1, $2, $3)', [patientId, req.session.user.midwifeid, appointmentDate], (error, results) => {
         if (error) {
             throw error;
         }
@@ -207,32 +183,26 @@ app.put('/api/appointments/:id', checkAuth, (req, res) => {
     });
 });
 
-app.get('/api/auth/user', checkAuth, (req, res) => {
-    res.json({
-        midwifeid: req.session.user.midwifeid,
-        midwifename: req.session.user.midwifename
-    });
-});
-
 app.get('/api/appointments/next', checkAuth, (req, res) => {
     const midwifeId = req.session.user.midwifeid;
     pool.query(
-        `SELECT a.*, p.name as patientname 
-         FROM appointments a 
-         JOIN patients p ON a.patientid = p.patientid 
-         WHERE a.midwifeid = $1 AND a.appointmentdate > NOW() 
-         ORDER BY a.appointmentdate ASC 
-         LIMIT 1`, 
-        [midwifeId], 
-        (error, results) => {
-            if (error) {
-                console.error('Database query error:', error);
-                res.json({ success: false, message: 'Database error' });
-                return;
-            }
-            res.json(results.rows[0] || null);
+        `SELECT a.appointmentdate, p.patientname, a.notes
+         FROM appointments a
+         JOIN patients p ON a.patientid = p.patientid
+         WHERE a.midwifeid = $1 AND a.appointmentdate > NOW()
+         ORDER BY a.appointmentdate ASC
+         LIMIT 1`, [midwifeId], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error);
+            res.json({ success: false, message: 'Database error' });
+            return;
         }
-    );
+        if (results.rows.length > 0) {
+            res.json({ success: true, appointment: results.rows[0], midwifeName: req.session.user.firstname + ' ' + req.session.user.lastname });
+        } else {
+            res.json({ success: false, message: 'No upcoming appointments', midwifeName: req.session.user.firstname + ' ' + req.session.user.lastname });
+        }
+    });
 });
 
 app.listen(port, () => {

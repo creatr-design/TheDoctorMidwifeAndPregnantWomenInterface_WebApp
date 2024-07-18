@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Patient Details</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <button onclick="openSidebar()">&#9776;</button>
+            <h2>Midwife Portal</h2>
+            <button class="logout-button" onclick="logout()">Logout</button>
+        </div>
+        <div id="sidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+            <a href="/home">Home</a>
+            <a href="/add_patient.html">Add Patient</a>
+            <a href="/update-patient-details.html">Update Patient Details</a>
+            <a href="/create-appointment.html">Create Appointment</a>
+        </div>
+        <div class="main-content">
+            <h2>Update Patient Details</h2>
+            <form id="updatePatientForm">
+                <div class="txt_field">
+                    <input type="text" id="patientId" name="id" required>
+                    <label for="patientId">Patient ID</label>
+                    <span></span>
+                </div>
+                <div class="txt_field">
+                    <input type="text" id="patientName" name="name">
+                    <label for="patientName">Name</label>
+                    <span></span>
+                </div>
+                <div class="txt_field">
+                    <input type="text" id="patientPhone" name="phone">
+                    <label for="patientPhone">Phone</label>
+                    <span></span>
+                </div>
+                <div class="txt_field">
+                    <input type="text" id="patientLanguage" name="language">
+                    <label for="patientLanguage">Language</label>
+                    <span></span>
+                </div>
+                <input type="submit" value="Update Patient">
+            </form>
+
+            <h2>Update Appointment Status</h2>
+            <form id="updateAppointmentStatusForm">
+                <div class="txt_field">
+                    <input type="text" id="appointmentId" name="id" required>
+                    <label for="appointmentId">Appointment ID</label>
+                    <span></span>
+                </div>
+                <div class="txt_field">
+                    <input type="text" id="status" name="status" required>
+                    <label for="status">Status</label>
+                    <span></span>
+                </div>
+                <input type="submit" value="Update Status">
+            </form>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+    <script>
+        function openSidebar() {
+            document.getElementById("sidebar").classList.add("active");
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove("active");
+        }
+
+        function logout() {
+            fetch('/api/auth/logout', {
+                method: 'POST',
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    alert('Logout failed');
+                }
+            });
+        }
+
+        document.getElementById('updatePatientForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const id = document.getElementById('patientId').value;
+            const name = document.getElementById('patientName').value;
+            const phone = document.getElementById('patientPhone').value;
+            const language = document.getElementById('patientLanguage').value;
+
+            fetch(`/api/patients/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, phone, language })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('result').innerText = 'Patient details updated successfully!';
+                } else {
+                    document.getElementById('result').innerText = 'Error updating patient details.';
+                }
+            });
+        });
+
+        document.getElementById('updateAppointmentStatusForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const id = document.getElementById('appointmentId').value;
+            const status = document.getElementById('status').value;
+
+            fetch(`/api/appointments/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('result').innerText = 'Appointment status updated successfully!';
+                } else {
+                    document.getElementById('result').innerText = 'Error updating appointment status.';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

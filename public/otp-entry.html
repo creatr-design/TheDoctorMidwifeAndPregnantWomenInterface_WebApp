@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <title>OTP Entry</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="center">
+        <h1>Enter OTP</h1>
+        <form id="otp-form">
+            <div class="txt_field">
+                <input type="text" name="otp" required />
+                <span></span>
+                <label>OTP</label>
+            </div>
+            <input type="submit" value="Verify OTP" />
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $("#otp-form").on('submit', function(event) {
+                event.preventDefault();
+                const otp = $("input[name='otp']").val();
+                const phoneNumber = localStorage.getItem('phoneNumber'); // Retrieve the phone number from local storage
+                
+                $.post('/api/auth/verify-otp', { otp, phoneNumber }, function(response) {
+                    if (response.success) {
+                        alert('OTP verified successfully');
+                        window.location.href = '/reset-password.html'; // Redirect to reset password page
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

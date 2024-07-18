@@ -7,75 +7,101 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="navbar">
-        <button class="menu-button" onclick="openSidebar()">☰</button>
-        <h1>Home</h1>
-        <div id="welcomeMessage"></div>
-    </div>
-    <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
-        <a href="/home">Home</a>
-        <a href="/patients">Add Patient</a>
-        <a href="/update-patient">Update Patient</a>
-        <a href="/appointments">Create Appointment</a>
-        <a href="/update-appointment">Update Appointment Status</a>
-        <a href="javascript:void(0)" onclick="logout()">Logout</a>
-    </div>
-    <div class="main-content">
-        <div id="nextAppointment"></div>
+    <div class="container">
+        <div class="navbar">
+            <button onclick="openSidebar()">&#9776;</button>
+            <h2>Midwife Portal</h2>
+            <button class="logout-button" onclick="logout()">Logout</button>
+        </div>
+        <div id="sidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+            <a href="/home">Home</a>
+            <a href="/add_patient.html">Add Patient</a>
+            <a href="/update-patient-details.html">Update Patient Details</a>
+            <a href="/create-appointment.html">Create Appointment</a>
+        </div>
+        <div class="main-content">
+            <h2>Welcome to the Midwife Portal</h2>
+            <p>Here is the next appointment:</p>
+            <div class="appointment-details" id="appointmentDetails"></div>
+
+            <h2>Create Appointment</h2>
+            <form id="createAppointmentForm">
+                <div class="txt_field">
+                    <input type="text" id="patientId" name="patientId" required>
+                    <label for="patientId">Patient ID</label>
+                    <span></span>
+                </div>
+                <div class="txt_field">
+                    <input type="datetime-local" id="appointmentDate" name="appointmentDate" required>
+                    <label for="appointmentDate">Appointment Date</label>
+                    <span></span>
+                </div>
+                <input type="submit" value="Create Appointment">
+            </form>
+            <div id="result" class="result"></div>
+        </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/auth/user')
-                .then(response => response.json())
-                .then(user => {
-                    if (user && user.midwifename) {
-                        document.getElementById('welcomeMessage').innerText = `Hello, ${user.midwifename}!`;
-                        fetch('/api/appointments/next')
-                            .then(response => response.json())
-                            .then(appointment => {
-                                if (appointment) {
-                                    document.getElementById('nextAppointment').innerHTML = `
-                                        <h2>Next Appointment</h2>
-                                        <p>Patient: ${appointment.patientname}</p>
-                                        <p>Date: ${new Date(appointment.appointmentdate).toLocaleString()}</p>
-                                        <p>Notes: ${appointment.notes || 'No notes available'}</p>
-                                    `;
-                                } else {
-                                    document.getElementById('nextAppointment').innerHTML = `
-                                        <h2>No upcoming appointments</h2>
-                                    `;
-                                }
-                            });
-                    } else {
-                        document.getElementById('welcomeMessage').innerText = 'Hello, Guest';
-                    }
-                })
-                .catch(err => {
-                    console.error('Error fetching user data:', err);
-                    document.getElementById('welcomeMessage').innerText = 'Hello, Guest';
-                });
-        });
-
         function openSidebar() {
-            document.getElementById("sidebar").style.width = "250px";
+            document.getElementById("sidebar").classList.add("active");
         }
 
         function closeSidebar() {
-            document.getElementById("sidebar").style.width = "0";
+            document.getElementById("sidebar").classList.remove("active");
         }
 
         function logout() {
             fetch('/api/auth/logout', {
-                method: 'POST'
+                method: 'POST',
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    alert('Logout failed');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/appointments/next')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const appointment = data.appointment;
+                        const detailsDiv = document.getElementById('appointmentDetails');
+                        detailsDiv.innerHTML = `
+                            <p><strong>Appointment Date:</strong> ${appointment.appointmentdate}</p>
+                            <p><strong>Patient Name:</strong> ${appointment.patientname}</p>
+                            <p><strong>Notes:</strong> ${appointment.notes}</p>
+                        `;
+                    } else {
+                        document.getElementById('appointmentDetails').innerText = 'No upcoming appointments';
+                    }
+                });
+        });
+
+        document.getElementById('createAppointmentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const patientId = document.getElementById('patientId').value;
+            const appointmentDate = document.getElementById('appointmentDate').value;
+
+            fetch('/api/appointments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ patientId, appointmentDate })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = '/';
+                    document.getElementById('result').innerText = 'Appointment created successfully!';
+                } else {
+                    document.getElementById('result').innerText = 'Error creating appointment.';
                 }
             });
-        }
+        });
     </script>
 </body>
 </html>

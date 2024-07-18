@@ -6,37 +6,48 @@
     <title>Login</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="login-container">
+<body class="login-body">
+    <div class="center">
         <h1>Login</h1>
         <form id="loginForm">
-            <label for="midwifeName">Midwife Name:</label>
-            <input type="text" id="midwifeName" name="midwifeName" required>
-            <label for="midwifePassword">Password:</label>
-            <input type="password" id="midwifePassword" name="midwifePassword" required>
-            <button type="submit">Login</button>
+            <div class="txt_field">
+                <input type="text" id="username" name="username" required>
+                <label for="username">Username</label>
+                <span></span>
+            </div>
+            <div class="txt_field">
+                <input type="password" id="password" name="password" required>
+                <label for="password">Password</label>
+                <span></span>
+            </div>
+            <input type="submit" value="Login">
         </form>
-        <div id="loginError" style="color: red; display: none;"></div>
+        <div id="result" class="result"></div>
     </div>
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const formData = new FormData(event.target);
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
             fetch('/api/auth/login', {
                 method: 'POST',
-                body: JSON.stringify(Object.fromEntries(formData)),
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({ username, password })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = '/home';
+                    window.location.href = data.redirect;
                 } else {
-                    document.getElementById('loginError').innerText = data.message;
-                    document.getElementById('loginError').style.display = 'block';
+                    document.getElementById('result').innerText = data.message;
                 }
+            })
+            .catch(error => {
+                document.getElementById('result').innerText = 'Error logging in';
+                console.error('Error:', error);
             });
         });
     </script>
