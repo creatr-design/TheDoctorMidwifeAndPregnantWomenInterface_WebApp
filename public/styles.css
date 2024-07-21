@@ -35,7 +35,7 @@ form .txt_field {
     margin: 30px 0;
 }
 
-.txt_field input {
+.txt_field input, .txt_field textarea {
     width: 100%;
     padding: 0 5px;
     height: 40px;
@@ -45,6 +45,11 @@ form .txt_field {
     background: none;
     outline: none;
     transition: border-color 0.5s;
+}
+
+.txt_field textarea {
+    resize: vertical;
+    height: 100px;
 }
 
 .txt_field label {
@@ -69,14 +74,14 @@ form .txt_field {
     transition: width 0.5s;
 }
 
-.txt_field input:focus ~ label,
-.txt_field input:valid ~ label {
+.txt_field input:focus ~ label, .txt_field input:valid ~ label,
+.txt_field textarea:focus ~ label, .txt_field textarea:valid ~ label {
     top: -5px;
     color: #2691d9;
 }
 
-.txt_field input:focus ~ span::before,
-.txt_field input:valid ~ span::before {
+.txt_field input:focus ~ span::before, .txt_field input:valid ~ span::before,
+.txt_field textarea:focus ~ span::before, .txt_field textarea:valid ~ span::before {
     width: 100%;
 }
 
@@ -220,6 +225,22 @@ h2 {
 
 .appointment-details p {
     margin: 10px 0;
+}
+
+/* Progress Bar Styles */
+.progress-container {
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 20px;
+    background-color: #4caf50;
+    border-radius: 5px;
+    transition: width 0.3s;
 }
 
 /* Specific fixes for login page */
