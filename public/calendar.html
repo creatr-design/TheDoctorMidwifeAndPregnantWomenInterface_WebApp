@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <button onclick="openSidebar()">&#9776;</button>
+            <h2>Midwife Portal</h2>
+            <button class="logout-button" onclick="logout()">Logout</button>
+        </div>
+        <div id="sidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+            <a href="/home">Home</a>
+            <a href="/add-patient.html">Add Patient</a>
+            <a href="/update-patient-details.html">Update Patient Details</a>
+            <a href="/create-appointment.html">Create Appointment</a>
+            <a href="/calendar.html">View Calendar</a>
+        </div>
+        <div class="main-content">
+            <h2 align="center">Appointment Calendar</h2>
+            <div id="calendar"></div>
+        </div>
+    </div>
+    <script>
+        function openSidebar() {
+            document.getElementById("sidebar").classList.add("active");
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove("active");
+        }
+
+        function logout() {
+            fetch('/api/auth/logout', {
+                method: 'POST',
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    alert('Logout failed');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/appointments')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const appointments = data.appointments;
+                        const calendarDiv = document.getElementById('calendar');
+
+                        let table = '<table>';
+                        table += '<tr><th>Time</th>';
+                        for (let i = 0; i < 7; i++) {
+                            const date = new Date();
+                            date.setDate(date.getDate() + i);
+                            const day = date.toLocaleString('default', { weekday: 'short' });
+                            const formattedDate = `${day}, ${date.getDate()}-${date.toLocaleString('default', { month: 'short' })}`;
+                            table += `<th>${formattedDate}</th>`;
+                        }
+                        table += '</tr>';
+
+                        for (let hour = 0; hour < 24; hour++) {
+                            table += '<tr>';
+                            table += `<td>${hour}:00</td>`;
+                            for (let i = 0; i < 7; i++) {
+                                const date = new Date();
+                                date.setDate(date.getDate() + i);
+                                date.setHours(hour, 0, 0, 0);
+                                const dateStr = date.toISOString();
+
+                                const appointment = appointments.find(a => new Date(a.appointmentdate).toISOString() === dateStr);
+                                table += `<td>${appointment ? `ID: ${appointment.appointmentid}<br>${appointment.patientname}` : ''}</td>`;
+                            }
+                            table += '</tr>';
+                        }
+                        table += '</table>';
+
+                        calendarDiv.innerHTML = table;
+                    } else {
+                        document.getElementById('calendar').innerText = 'No appointments available';
+                    }
+                });
+        });
+    </script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</body>
+</html>

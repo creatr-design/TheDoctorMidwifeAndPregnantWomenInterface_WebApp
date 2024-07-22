@@ -55,11 +55,15 @@ app.get('/home', checkAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
+app.get('/calendar.html', checkAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'calendar.html'));
+});
+
 app.post('/api/auth/login', (req, res) => {
-    const { username, midwifePassword } = req.body;
+    const { username, midwifePassword } = req.body; // Ensure this matches the client-side form fields
     console.log('Login attempt:', username, midwifePassword);
 
-    pool.query('SELECT * FROM midwives WHERE LOWER(username) = LOWER($1) AND midwifepassword = $2', [username, midwifePassword], (error, results) => {
+    pool.query('SELECT * FROM midwives WHERE LOWER(username) = LOWER($1) AND midwifePassword = $2', [username, midwifePassword], (error, results) => {
         if (error) {
             console.error('Database query error:', error);
             res.json({ success: false, message: 'Database error' });
@@ -75,6 +79,7 @@ app.post('/api/auth/login', (req, res) => {
         }
     });
 });
+
 
 app.get('/api/midwife', (req, res) => {
     if (req.session.user) {
@@ -182,6 +187,18 @@ app.get('/api/pregnancy-progress', checkAuth, (req, res) => {
             }
         }
     );
+});
+
+app.get('/api/appointments', checkAuth, (req, res) => {
+    const midwifeId = req.session.user.midwifeid;
+    pool.query('SELECT * FROM appointments WHERE midwifeid = $1', [midwifeId], (error, results) => {
+        if (error) {
+            console.error('Error fetching appointments:', error);
+            res.json({ success: false, message: 'Database error' });
+        } else {
+            res.json({ success: true, appointments: results.rows });
+        }
+    });
 });
 
 app.listen(port, () => {

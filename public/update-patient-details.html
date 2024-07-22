@@ -45,20 +45,21 @@
                 </div>
                 <input type="submit" value="Update Patient">
             </form>
+            <br><br><br>
 
-            <h2>Update Appointment Status</h2>
-            <form id="updateAppointmentStatusForm">
+            <h2>Reschedule Appointment</h2>
+            <form id="rescheduleAppointmentForm">
                 <div class="txt_field">
                     <input type="text" id="appointmentId" name="id" required>
                     <label for="appointmentId">Appointment ID</label>
                     <span></span>
                 </div>
                 <div class="txt_field">
-                    <input type="text" id="status" name="status" required>
-                    <label for="status">Status</label>
+                    <input type="datetime-local" id="newDate" name="newDate" required>
+                    <label for="newDate"> </label>
                     <span></span>
                 </div>
-                <input type="submit" value="Update Status">
+                <input type="submit" value="Reschedule Appointment">
             </form>
             <div id="result" class="result"></div>
         </div>
@@ -108,24 +109,24 @@
             });
         });
 
-        document.getElementById('updateAppointmentStatusForm').addEventListener('submit', function(event) {
+        document.getElementById('rescheduleAppointmentForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const id = document.getElementById('appointmentId').value;
-            const status = document.getElementById('status').value;
+            const newDate = document.getElementById('newDate').value;
 
             fetch(`/api/appointments/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ status })
+                body: JSON.stringify({ newDate })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById('result').innerText = 'Appointment status updated successfully!';
+                    document.getElementById('result').innerText = 'Appointment rescheduled successfully!';
                 } else {
-                    document.getElementById('result').innerText = 'Error updating appointment status.';
+                    document.getElementById('result').innerText = 'Error rescheduling appointment.';
                 }
             });
         });
