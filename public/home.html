@@ -5,56 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        .progress-container {
-            width: 100%;
-            background-color: #f3f3f3;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 20px;
-            background-color: #4caf50;
-            border-radius: 5px;
-            transition: width 0.3s;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: #218bf5; 
-            outline: none;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            height: 100px;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
         <div class="navbar">
-            <button onclick="openSidebar()">&#9776;</button>
+            <button onclick="openSidebar()" fdprocessedid="lyf5r" class="menu-button">&#9776;</button>
             <h2>Midwife Portal</h2>
             <button class="logout-button" onclick="logout()">Logout</button>
         </div>
@@ -62,9 +17,9 @@
             <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
             <a href="/home">Home</a>
             <a href="/add-patient.html">Add Patient</a>
-            <a href="/update-patient-details.html">Update Patient Details</a>
-            <a href="/create-appointment.html">Create Appointment</a>
+            <a href="/update-patient-details.html">Update Patient Details</a>            
             <a href="/calendar.html">View Calendar</a>
+            <a href="/patients.html">Patients</a>
         </div>
         <div class="main-content">
             <p>Welcome</p>
@@ -73,7 +28,8 @@
             <h2 align="center">Your Next Appointment:</h2>
             <div align="center" class="appointment-details" id="appointmentDetails"></div><br>
             <p align="center">Number of appointments today: <span id="appointmentCount"></span></p><br><br>
-            <h2>Create Appointment</h2><br>
+
+            <h2>Create Appointment</h2>
             <form id="createAppointmentForm">
                 <div class="form-group">
                     <label for="patientId">Patient ID</label>
@@ -84,6 +40,10 @@
                     <input type="datetime-local" id="appointmentDate" name="appointmentDate" required>
                 </div>
                 <div class="form-group">
+                    <label for="patientPhone">Phone Number</label>
+                    <input type="tel" id="patientPhone" name="patientPhone" pattern="02\d{8}" maxlength="10" required>
+                </div>
+                <div class="form-group">
                     <label for="notes">Notes</label>
                     <textarea id="notes" name="notes" required></textarea>
                 </div>
@@ -92,97 +52,12 @@
             <div id="result" class="result"></div><br><br>
 
             <h2>Pregnancy Progress</h2>
-            <div class="progress-container">
+            <div class="progress-container" id="pregnancyContainer">
                 <div class="progress-bar" id="pregnancyProgress"></div>
             </div>
             <p id="pregnancyWeeks" align="center"></p>
         </div>
     </div>
-    <script>
-        function openSidebar() {
-            document.getElementById("sidebar").classList.add("active");
-        }
-
-        function closeSidebar() {
-            document.getElementById("sidebar").classList.remove("active");
-        }
-
-        function logout() {
-            fetch('/api/auth/logout', {
-                method: 'POST',
-            }).then(response => response.json()).then(data => {
-                if (data.success) {
-                    window.location.href = '/';
-                } else {
-                    alert('Logout failed');
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/midwife')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('midwifeName').innerText = data.midwifeName + '!';
-                    }
-                });
-
-            fetch('/api/appointments/next')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const appointment = data.appointment;
-                        const detailsDiv = document.getElementById('appointmentDetails');
-                        const appointmentDate = new Date(appointment.appointmentdate);
-                        detailsDiv.innerHTML = `
-                            <p><strong>Appointment Date:</strong> ${appointmentDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-                            <p><strong>Patient Name:</strong> ${appointment.patientname}</p>
-                            <p><strong>Notes:</strong> ${appointment.notes}</p>
-                        `;
-                        document.getElementById('appointmentCount').innerText = data.appointmentsToday;
-                    } else {
-                        document.getElementById('appointmentDetails').innerText = 'No upcoming appointments';
-                        document.getElementById('appointmentCount').innerText = 0;
-                    }
-                });
-
-            fetch('/api/pregnancy-progress')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const progressBar = document.getElementById('pregnancyProgress');
-                        progressBar.style.width = data.progress + '%';
-                        const weeksElapsed = Math.floor(data.progress / 100 * 40);
-                        document.getElementById('pregnancyWeeks').innerText = `Weeks into pregnancy: ${weeksElapsed}`;
-                    } else {
-                        document.getElementById('pregnancyProgress').innerText = 'No pregnancy data available';
-                    }
-                });
-        });
-
-        document.getElementById('createAppointmentForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const patientId = document.getElementById('patientId').value;
-            const appointmentDate = document.getElementById('appointmentDate').value;
-            const notes = document.getElementById('notes').value;
-
-            fetch('/api/appointments', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ patientId, appointmentDate, notes })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('result').innerText = 'Appointment created successfully!';
-                } else {
-                    document.getElementById('result').innerText = 'Error creating appointment.';
-                }
-            });
-        });
-    </script>
+    <script src="home-scripts.js"></script>
 </body>
 </html>

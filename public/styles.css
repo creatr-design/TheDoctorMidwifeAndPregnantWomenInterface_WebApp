@@ -38,7 +38,7 @@ form .txt_field {
 .txt_field input, .txt_field textarea {
     width: 100%;
     padding: 0 5px;
-    height: 40px;
+    height: 42px;
     font-size: 16px;
     border: none;
     border-bottom: 2px solid #adadad;
@@ -145,6 +145,24 @@ input[type="submit"]:hover {
     cursor: pointer;
 }
 
+.menu-button {
+    background: white;
+    text-size-adjust: auto;
+    border: 2px solid #d3d3d3;
+    max-width: 60px;
+    width: 100%;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.menu-button:hover {
+    border-color: #1a6bb7;
+}
+
+.menu-button:active {
+    border-color:  white;
+}
+
 .welcome-message {
     font-size: 18px;
     font-weight: bold;
@@ -234,6 +252,35 @@ h2 {
     margin: 20px 0;
 }
 
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #1a6bb7;
+    outline: none;
+}
+
+.form-group textarea {
+    resize: vertical;
+    height: 100px;
+}
+
 .progress-bar {
     width: 0%;
     height: 20px;
@@ -250,4 +297,20 @@ h2 {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+/* Calendar Page Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
 }

@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <div class="navbar">
-            <button onclick="openSidebar()">&#9776;</button>
+            <button onclick="openSidebar()" fdprocessedid="lyf5r" class="menu-button">&#9776;</button>
             <h2>Midwife Portal</h2>
             <button class="logout-button" onclick="logout()">Logout</button>
         </div>
@@ -21,26 +21,26 @@
             <a href="/create-appointment.html">Create Appointment</a>
         </div>
         <div class="main-content">
-            <h2>Update Patient Details</h2>
+            <h2>Update Patient Details</h2><br>
             <form id="updatePatientForm">
-                <div class="txt_field">
-                    <input type="text" id="patientId" name="id" required>
+                <div class="form-group">
                     <label for="patientId">Patient ID</label>
+                    <input type="text" id="patientId" name="id" required>                   
                     <span></span>
                 </div>
-                <div class="txt_field">
-                    <input type="text" id="patientName" name="name">
+                <div class="form-group">
                     <label for="patientName">Name</label>
+                    <input type="text" id="patientName" name="name">                    
                     <span></span>
                 </div>
-                <div class="txt_field">
-                    <input type="text" id="patientPhone" name="phone">
+                <div class="form-group">
                     <label for="patientPhone">Phone</label>
+                    <input type="text" id="patientPhone" name="phone">                    
                     <span></span>
                 </div>
-                <div class="txt_field">
-                    <input type="text" id="patientLanguage" name="language">
+                <div class="form-group">
                     <label for="patientLanguage">Language</label>
+                    <input type="text" id="patientLanguage" name="language">                    
                     <span></span>
                 </div>
                 <input type="submit" value="Update Patient">
@@ -48,15 +48,15 @@
             <br><br><br>
 
             <h2>Reschedule Appointment</h2>
-            <form id="rescheduleAppointmentForm">
-                <div class="txt_field">
-                    <input type="text" id="appointmentId" name="id" required>
+            <form id="rescheduleAppointmentForm"><br>
+                <div class="form-group">
                     <label for="appointmentId">Appointment ID</label>
+                    <input type="text" id="appointmentId" name="id" required>                    
                     <span></span>
                 </div>
-                <div class="txt_field">
-                    <input type="datetime-local" id="newDate" name="newDate" required>
-                    <label for="newDate"> </label>
+                <div class="form-group">
+                    <label for="newDate">New Date</label>
+                    <input type="datetime-local" id="newDate" name="newDate" required>                    
                     <span></span>
                 </div>
                 <input type="submit" value="Reschedule Appointment">

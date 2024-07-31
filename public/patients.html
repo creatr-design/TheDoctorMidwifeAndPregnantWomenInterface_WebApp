@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patients List</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <button onclick="openSidebar()">&#9776;</button>
+            <h2>Midwife Portal</h2>
+            <button class="logout-button" onclick="logout()">Logout</button>
+        </div>
+        <div id="sidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+            <a href="/home">Home</a>
+            <a href="/add-patient.html">Add Patient</a>
+            <a href="/update-patient-details.html">Update Patient Details</a>
+            <a href="/create-appointment.html">Create Appointment</a>
+            <a href="/calendar.html">View Calendar</a>
+            <a href="/patients.html">View Patients</a>
+        </div>
+        <div class="main-content">
+            <h2 align="center">Patients List</h2>
+            <input type="text" id="searchInput" onkeyup="searchPatients()" placeholder="Search for patients by name or ID">
+            <div id="patientsList"></div>
+        </div>
+    </div>
+    <script>
+        function openSidebar() {
+            document.getElementById("sidebar").classList.add("active");
+        }
+
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove("active");
+        }
+
+        function logout() {
+            fetch('/api/auth/logout', {
+                method: 'POST',
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    alert('Logout failed');
+                }
+            });
+        }
+
+        function searchPatients() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const rows = document.getElementById('patientsList').getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const nameCell = rows[i].getElementsByTagName('td')[1];
+                const idCell = rows[i].getElementsByTagName('td')[0];
+                if (nameCell || idCell) {
+                    const nameText = nameCell.textContent || nameCell.innerText;
+                    const idText = idCell.textContent || idCell.innerText;
+                    if (nameText.toLowerCase().indexOf(filter) > -1 || idText.toLowerCase().indexOf(filter) > -1) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/patients')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const patients = data.patients;
+                        const patientsListDiv = document.getElementById('patientsList');
+
+                        let table = '<table>';
+                        table += '<tr><th>ID</th><th>Name</th><th>Phone</th><th>Language</th><th>Medical History</th></tr>';
+                        
+                        patients.forEach(patient => {
+                            table += `<tr>
+                                        <td>${patient.patientid}</td>
+                                        <td>${patient.patientname}</td>
+                                        <td>${patient.patientphone}</td>
+                                        <td>${patient.language}</td>
+                                        <td>${patient.medical_history}</td>
+                                      </tr>`;
+                        });
+
+                        table += '</table>';
+                        patientsListDiv.innerHTML = table;
+                    } else {
+                        document.getElementById('patientsList').innerText = 'No patients available';
+                    }
+                });
+        });
+    </script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 12px 0;
+            box-sizing: border-box;
+        }
+    </style>
+</body>
+</html>
