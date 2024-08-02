@@ -35,8 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const detailsDiv = document.getElementById('appointmentDetails');
                 const appointmentDate = new Date(appointment.appointmentdate);
                 detailsDiv.innerHTML = `
-                    <p><strong>Appointment Date:</strong> ${appointmentDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-                    <p><strong>Patient Name:</strong> ${appointment.patientname}</p>
+                    <p><strong>Patient Name:</strong> ${appointment.patientname}</p>    
+                    <p><strong>Date:</strong> ${appointmentDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                    <p><strong>Time:</strong> ${appointmentDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</p>                   
                     <p><strong>Notes:</strong> ${appointment.notes}</p>
                 `;
                 document.getElementById('appointmentCount').innerText = data.appointmentsToday;
