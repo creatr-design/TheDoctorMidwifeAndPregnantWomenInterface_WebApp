@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <div class="navbar">
-            <button onclick="openSidebar()">&#9776;</button>
+            <button onclick="openSidebar()" fdprocessedid="lyf5r" class="menu-button">&#9776;</button>
             <h2>Midwife Portal</h2>
             <button class="logout-button" onclick="logout()">Logout</button>
         </div>
@@ -17,10 +17,9 @@
             <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
             <a href="/home">Home</a>
             <a href="/add-patient.html">Add Patient</a>
-            <a href="/update-patient-details.html">Update Patient Details</a>
-            <a href="/create-appointment.html">Create Appointment</a>
+            <a href="/update-patient-details.html">Update Patient Details</a>            
             <a href="/calendar.html">View Calendar</a>
-            <a href="/patients.html">View Patients</a>
+            <a href="/patients.html">Patients</a>
         </div>
         <div class="main-content">
             <h2 align="center">Patients List</h2>
@@ -45,7 +44,7 @@
                     window.location.href = '/';
                 } else {
                     alert('Logout failed');
-                }
+                }   
             });
         }
 
