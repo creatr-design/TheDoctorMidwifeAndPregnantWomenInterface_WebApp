@@ -260,7 +260,7 @@ app.get('/api/appointments', checkAuth, (req, res) => {
 app.get('/api/patients', checkAuth, (req, res) => {
     const midwifeId = req.session.user.midwifeid;
     pool.query(
-        `SELECT DISTINCT p.patientid, p.patientname, p.patientphone, p.language, p.medical_history
+        `SELECT DISTINCT p.patientid, p.patientname, p.patientphone, p.language, p.medical_history, p.pregnancy_start_date
          FROM patients p
          JOIN appointments a ON p.patientid = a.patientid
          WHERE a.midwifeid = $1`,
