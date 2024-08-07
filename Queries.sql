@@ -1,9 +1,16 @@
 select * from midwives;
 select * from patients;
-select * from appointments;
+select * from appointments
+WHERE patientid = '3';
 
+UPDATE appointments
+SET appointmentdate = '2024-08-08'
+WHERE patientid = '3' AND appointmentid ='3';
 
-
+SELECT p.patientphone, a.appointmentid, p.sms_type, p.language
+FROM appointments a 
+JOIN patients p ON a.patientid = p.patientid
+WHERE appointmentdate::date = CURRENT_DATE + INTERVAL '1 day';
 
 SELECT * FROM midwives WHERE LOWER(username) = LOWER('nbrown');
 
@@ -22,8 +29,7 @@ INSERT INTO appointments (patientid, midwifeid, appointmentdate, status, notes) 
 
 ALTER TABLE patients ADD COLUMN pregnancy_start_date DATE;
 
-UPDATE patients
-SET pregnancy_start_date = '2023-09-15'
-WHERE patientname = 'Bob Smith';
-
-\dn
+SELECT p.patientphone, a.appointmentid, p.sms_type, p.language
+FROM appointments a 
+JOIN patients p ON a.patientid = p.patientid
+WHERE appointmentdate::date = CURRENT_DATE + INTERVAL '1 day';
