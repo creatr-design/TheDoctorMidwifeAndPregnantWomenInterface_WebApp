@@ -3,8 +3,8 @@ select * from patients;
 select * from appointments
 WHERE patientid = '3';
 
-UPDATE appointments
-SET appointmentdate = '2024-08-08'
+UPDATE patients
+SET language = 'Hausa'
 WHERE patientid = '3' AND appointmentid ='3';
 
 SELECT p.patientphone, a.appointmentid, p.sms_type, p.language
