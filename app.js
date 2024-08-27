@@ -162,7 +162,7 @@ app.get('/api/appointments/next', checkAuth, (req, res) => {
 });
 
 app.post('/api/appointments', checkAuth, async (req, res) => {
-    const { patientId, appointmentDate, patientPhone, notes } = req.body;
+    const { patientId, appointmentDate, notes } = req.body;
     const midwifeId = req.session.user.midwifeid;
     const appointmentDateObj = new Date(appointmentDate);
 
@@ -175,8 +175,8 @@ app.post('/api/appointments', checkAuth, async (req, res) => {
     }
 
     pool.query(
-        'INSERT INTO appointments (patientid, appointmentdate, patientphone, notes, midwifeid) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [patientId, appointmentDate, patientPhone, notes, midwifeId],
+        'INSERT INTO appointments (patientid, appointmentdate, notes, midwifeid) VALUES ($1, $2, $3, $4) RETURNING *',
+        [patientId, appointmentDate, notes, midwifeId],
         (error, results) => {
             if (error) {
                 console.error('Error creating appointment:', error);
