@@ -1,11 +1,11 @@
-select * from midwives;
-select * from patients;
-select * from appointments
+select * from midwives where midwifeid = 5;
+select * from patients where patientid =5;
+select * from appointments where appointmentid = 39;
 WHERE patientid = '3';
 
-UPDATE appointments
-SET appointmentdate = '2024-08-08'
-WHERE patientid = '3' AND appointmentid ='3';
+UPDATE patients
+SET pregnancy_start_date = '2024-5-12'
+WHERE patientid = '3';
 
 SELECT p.patientphone, a.appointmentid, p.sms_type, p.language
 FROM appointments a 
@@ -27,7 +27,9 @@ INSERT INTO appointments (patientid, midwifeid, appointmentdate, status, notes) 
 (10, 5, '2024-07-29 09:00:00', 'Scheduled', 'Final checkup');
 
 
-ALTER TABLE patients ADD COLUMN pregnancy_start_date DATE;
+UPDATE appointments 
+SET appointmentdate = '2024-08-26'
+WHERE appointmentid = '39';
 
 SELECT p.patientphone, a.appointmentid, p.sms_type, p.language
 FROM appointments a 
