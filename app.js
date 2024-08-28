@@ -188,6 +188,28 @@ app.post('/api/appointments', checkAuth, async (req, res) => {
     );
 });
 
+app.get('/api/appointments', checkAuth, (req, res) => {
+    const patientId = req.query.patientId;
+
+    if (patientId) {
+        // Fetch appointments for a specific patient
+        pool.query(
+            'SELECT * FROM appointments WHERE patientid = $1',
+            [patientId],
+            (error, results) => {
+                if (error) {
+                    console.error('Error retrieving appointments:', error);
+                    return res.status(500).json({ success: false, message: 'Failed to retrieve appointments' });
+                }
+
+                res.json({ success: true, appointments: results.rows });
+            }
+        );
+    } else {
+        res.status(400).json({ success: false, message: 'No patient ID provided' });
+    }
+});
+
 app.get('/api/appointments-calendar', checkAuth, (req, res) => {
     const midwifeId = req.session.user.midwifeid;
     pool.query(

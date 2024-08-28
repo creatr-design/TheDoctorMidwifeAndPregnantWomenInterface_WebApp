@@ -3,9 +3,9 @@ select * from patients where patientid =5;
 select * from appointments where appointmentid = 39;
 WHERE patientid = '3';
 
-UPDATE patients
-SET pregnancy_start_date = '2024-5-12'
-WHERE patientid = '3';
+UPDATE appointments
+SET appointmentdate = '2024-8-28'
+WHERE appointmentid = '39';
 
 SELECT p.patientphone, a.appointmentid, p.sms_type, p.language
 FROM appointments a 

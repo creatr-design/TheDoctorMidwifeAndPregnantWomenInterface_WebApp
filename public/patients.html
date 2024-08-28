@@ -1,70 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Patients List</title>
     <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
+</head>
+<body>
     <div class="container">
-      <div class="navbar">
-        <button
-          onclick="openSidebar()"
-          fdprocessedid="lyf5r"
-          class="menu-button"
-        >
-          &#9776;
-        </button>
-        <h2>Midwife Portal</h2>
-        <button class="logout-button" onclick="logout()">Logout</button>
-      </div>
-      <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()"
-          >&times;</a
-        >
-        <a href="/home">Home</a>
-        <a href="/add-patient.html">Add Patient</a>
-        <a href="/update-patient-details.html">Update Patient Details</a>
-        <a href="/calendar.html">View Calendar</a>
-        <a href="/patients.html">Patients</a>
-      </div>
-      <div class="main-content">
-        <h2 align="center">Patients List</h2>
-        <input
-          type="text"
-          id="searchInput"
-          onkeyup="searchPatients()"
-          placeholder="Search for patients by name or ID"
-        />
-        <div id="patientsList"></div>
-      </div>
+        <div class="navbar">
+            <button onclick="openSidebar()" class="menu-button">&#9776;</button>
+            <h2>Midwife Portal</h2>
+            <button class="logout-button" onclick="logout()">Logout</button>
+        </div>
+        <div id="sidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+            <a href="/home">Home</a>
+            <a href="/add-patient.html">Add Patient</a>
+            <a href="/update-patient-details.html">Update Patient Details</a>
+            <a href="/calendar.html">View Calendar</a>
+            <a href="/patients.html">Patients</a>
+        </div>
+        <div class="main-content">
+            <h2 align="center">Patients List</h2>
+            <input type="text" id="searchInput" onkeyup="searchPatients()" placeholder="Search for patients by name or ID" />
+            <div id="patientsList"></div>
+            <div id="appointmentsList" class="appointments-list"></div>
+        </div>
     </div>
-    <script src="patients.js">
-    </script>
+    <script src="patients.js"></script>
     <style>
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-      }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
 
-      th {
-        background-color: #f2f2f2;
-      }
+        th {
+            background-color: #f2f2f2;
+        }
 
-      #searchInput {
-        width: 100%;
-        padding: 12px 20px;
-        margin: 12px 0;
-        box-sizing: border-box;
-      }
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 12px 0;
+            box-sizing: border-box;
+        }
     </style>
-  </body>
+</body>
 </html>
